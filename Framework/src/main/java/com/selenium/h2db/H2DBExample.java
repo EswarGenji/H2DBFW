@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 
@@ -13,18 +14,18 @@ import java.sql.Statement;
 public class H2DBExample {
 	
 	 private static final String DB_DRIVER = "org.h2.Driver";
-	 private static final String DB_CONNECTION = "jdbc:h2:~/test";
+	 private static final String DB_CONNECTION = "jdbc:h2:~/Composite";
 	 private static final String DB_USER = "sa";
 	 private static final String DB_PASSWORD = "";
 	
 	
 	public static Connection connectToH2DB()
 	{
+		
 		 Connection dbConnection = null;
 		try
 		{
 			   Class.forName(DB_DRIVER);
-			   System.out.println("Driver loaded the successfully..");
 			   dbConnection = DriverManager.getConnection(DB_CONNECTION, DB_USER,DB_PASSWORD);
 			   System.out.println("H2 DB Connected.");
 		}
@@ -36,7 +37,7 @@ public class H2DBExample {
 		return dbConnection;
 	}
 	
-	public static void createDataTable()
+	public static void createBookingReservationDataDataTable() throws SQLException
 	{
 		  PreparedStatement createPreparedStatement = null;
 		  Connection con=null;
@@ -49,71 +50,117 @@ public class H2DBExample {
 	         createPreparedStatement.executeUpdate();
 	         createPreparedStatement.close();
 	         
-	         System.out.println("Table created in the H2DB..");
+	         System.out.println(" BookingReservationData Table created in the H2DB..");
 			 
 		}
 		catch(Exception e)
 		{
 			System.out.println("Error occured while creating a Table in H2DB...."+e.getMessage());
 		}
+		finally
+		{
+			createPreparedStatement.close();
+			con.close();
+		}
 	}
 	
-	public static void insertRow(int id,String fname,String lname,int age )
+	
+	public static int getMaximumValueFromBookingReservationData(Connection con) throws SQLException
 	{
-		PreparedStatement insertPreparedStatement = null;
+		int maximum=0;
+		Statement stmt = null;
+	
+		try
+		{
+			 String selectQuery="SELECT MAX(id) AS id from BookingReservationData";
+			 stmt = con.createStatement();
+			 ResultSet rs = stmt.executeQuery(selectQuery);
+			 
+			 if(rs.next())
+				 maximum=rs.getInt("id");
+			 
+			 System.out.println("Maximum Id value ::"+maximum);
+	          
+		}
+		catch(Exception ex)
+		{
+			System.out.println("Error occured while getting the Maximum value from the BookingReservation Table..."+ex.getMessage());
+		}
+		finally
+		{
+			stmt.close();
+			
+		}
+		
+		return maximum;
+	}
+	
+	
+	public static void insertRowIntoBookingReservationData(String fname,String lname,int age ) throws SQLException
+	{
+		PreparedStatement pstmt = null;
 		Connection con=null;
 		try
 		{
+			con=connectToH2DB();
+			
+			 int id=getMaximumValueFromBookingReservationData(con);
 			 String InsertQuery = "INSERT INTO BookingReservationData" + "(id,fname,lname,age) values" + "(?,?,?,?)";
-			 con=H2DBExample.connectToH2DB();
 			 
-		    insertPreparedStatement = con.prepareStatement(InsertQuery);
-            insertPreparedStatement.setInt(1, id);
-            insertPreparedStatement.setString(2,fname);
-            insertPreparedStatement.setString(3,lname);
-            insertPreparedStatement.setInt(4, age);
+			 
+			 pstmt = con.prepareStatement(InsertQuery);
+			 pstmt.setInt(1, ++id);
+			 pstmt.setString(2,fname);
+			 pstmt.setString(3,lname);
+			 pstmt.setInt(4, age);
             
-            insertPreparedStatement.executeUpdate();
-            insertPreparedStatement.close();
+			 pstmt.executeUpdate();
+			 
+             System.out.println("'"+fname+"' Values inserted into the Booking Reservation Data Table..");
             
-            System.out.println("Row inserted into the Table ...");
-            
-            insertPreparedStatement.close();
-            con.commit();
+           
             
 		}
 		catch(Exception ex)
 		{
 			System.out.println("Error occured while inserting the row into the Table.."+ex.getMessage());
 		}
-		
+		finally
+		{
+			pstmt.close();
+			con.close();
+		}
 		
 	}
 	
-	public static void updateReservationNumber(String reservationNum,String fName)
+	public static void updateReservationNumber(String fName,String reservationNum) throws SQLException
 	{
-		PreparedStatement insertPreparedStatement = null;
+		PreparedStatement pstmt = null;
 		Connection con=null;
 		try
 		{
 			 con=H2DBExample.connectToH2DB();
 			 String updateQuery = "UPDATE BookingReservationData SET rvnum='"+reservationNum+"' WHERE fName='"+fName+"'";
-			  insertPreparedStatement = con.prepareStatement(updateQuery);
-			  insertPreparedStatement.executeUpdate();
-	          insertPreparedStatement.close();
+			 pstmt = con.prepareStatement(updateQuery);
+			 pstmt.executeUpdate();
+			 pstmt.close();
 			  
-	            System.out.println("Updated the Table ...");
-	            
-	            insertPreparedStatement.close();
-	            con.commit();
+	         System.out.println("'"+fName+"' Reservation Number updated with '"+reservationNum+"'");
+	         pstmt.close();
+	         con.commit();
 		}
 		catch(Exception ex)
-		{
+		{ 
 			System.out.println("Error occured while upating the ReservationNumber .."+ex.getMessage());
+		}
+		finally
+		{
+			pstmt.close();
+			con.close();
 		}
 	}
 	
-	public static void printRowValues()
+	public static void printBookingReservationData()
 	{
 		 Connection con = null;
 	     Statement stmt = null;
@@ -125,7 +172,22 @@ public class H2DBExample {
 		  ResultSet rs = stmt.executeQuery(selectQuery);
           
           while (rs.next()) {
-              System.out.println(rs.getInt("id")+" "+rs.getString("fname")+" "+rs.getString("lname")+" "+rs.getInt("age")+" "+rs.getString("rvnum"));
+        	   
+        	     int sno=rs.getInt("id");
+        	     String fName=rs.getString("fname");
+        	     String lName=rs.getString("lname");
+        	     int age=rs.getInt("age");
+        	     String rvNum=rs.getString("rvnum");
+        	   
+        	    System.out.println("**********************");
+        	    System.out.println(" Sno             ::"+sno);
+        	    System.out.println(" First Name      ::"+fName);
+        	    System.out.println(" Last  Name      ::"+lName);
+        	    System.out.println(" Age             ::"+age);
+        	    System.out.println(" Reservation Num ::"+rvNum);
+        	    System.out.println("**********************");
+        	   
+             
           }
           stmt.close();
           con.commit();
@@ -138,19 +200,60 @@ public class H2DBExample {
 		  
 	}
 	
-	public static void main(String[] args) {
+	public static void printBookingReservationDataByName(String firstName)
+	{
+		 Connection con = null;
+	     Statement stmt = null;
+		try
+		{
+		  String selectQuery="select * from BookingReservationData WHERE fname='"+firstName+"'";
+		  con=H2DBExample.connectToH2DB();
+		  stmt = con.createStatement();
+		  ResultSet rs = stmt.executeQuery(selectQuery);
+          
+          while (rs.next()) {
+        	   
+        	     int sno=rs.getInt("id");
+        	     String fName=rs.getString("fname");
+        	     String lName=rs.getString("lname");
+        	     int age=rs.getInt("age");
+        	     String rvNum=rs.getString("rvnum");
+        	   
+        	    System.out.println("**********************");
+        	    System.out.println(" Sno             ::"+sno);
+        	    System.out.println(" First Name      ::"+fName);
+        	    System.out.println(" Last  Name      ::"+lName);
+        	    System.out.println(" Age             ::"+age);
+        	    System.out.println(" Reservation Num ::"+rvNum);
+        	    System.out.println("**********************");
+        	   
+             
+          }
+          stmt.close();
+          con.commit();
+			
+		}
+		catch(Exception ex)
+		{
+			System.out.println("Error occured while reterving the values from the Table.."+ex.getMessage());
+		}
+		  
+	}
+	
+	public static void main(String[] args) throws SQLException {
 		
-		//H2DBExample db=new H2DBExample();
-		//H2DBExample.connectToH2DB();
-		//H2DBExample.createDataTable();
-		//H2DBExample.insertRow(1,"Kumar","Andapally",27);
-		//H2DBExample.insertRow(2,"Eswar","Genji",26);
+		H2DBExample.createBookingReservationDataDataTable();
 		
-	   
+		
+		H2DBExample.insertRowIntoBookingReservationData("Kumar","Andapally",27);
+		H2DBExample.insertRowIntoBookingReservationData("Eswar","Genji",26);
+		H2DBExample.printBookingReservationData();
 		
 		H2DBExample.updateReservationNumber("AB47874555","Kumar");
 		H2DBExample.updateReservationNumber("AB47874556","Eswar");
-		H2DBExample.printRowValues();
+		H2DBExample.printBookingReservationData();
+		H2DBExample.printBookingReservationDataByName("Eswar");
+		
 	}
 
 }
