@@ -18,10 +18,10 @@ public static void main(String[] args) throws SQLException {
 		
 		//Inserting data into Booking Reservation Data Table
 		data.insertRowIntoBookingReservationData("Eswar", "Genji", 26);
-		data.insertRowIntoBookingReservationData("Kumar", "Anadapally", 25);
-		data.insertRowIntoBookingReservationData("Vikas", "Narendarapu", 29);
-		data.insertRowIntoBookingReservationData("Murthy", "Papolu", 28);
-		data.insertRowIntoBookingReservationData("Swarrop", "Ondaranki", 28);
+		data.insertRowIntoBookingReservationData("Kumar", "Anada", 25);
+		data.insertRowIntoBookingReservationData("Vikas", "Naren", 29);
+		data.insertRowIntoBookingReservationData("Murty", "Papol", 28);
+		data.insertRowIntoBookingReservationData("Raman", "Ondar", 28);
 		
 		
 		
@@ -30,9 +30,9 @@ public static void main(String[] args) throws SQLException {
 		data.updateReservationNumber("Kumar", "A784578S58");
 		
 		
-		//Getting the Booking Reservation Data by First Name and Last Name
+		//Getting the Booking Reservation Data by First Name and Laast Name
 		String firstName="Kumar";
-		String lastName="Anadapally";
+		String lastName="Anada";
 		
 		BookingReservation reservation=new BookingReservation();
 		reservation=data.getBookingReservationDataByName(firstName,lastName);

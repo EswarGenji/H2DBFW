@@ -171,7 +171,7 @@ public class H2DBBookingReservationData {
 		  ResultSet rs = stmt.executeQuery(selectQuery);
           
 		  System.out.println("***********************************************************************");
-  		  System.out.println("Sno   "+" First Name   "+"Last Name   "+" Age   "+"  Reservation Number");
+  		  System.out.println("Sno   "+"First Name   "+"Last Name   "+"Age   "+"  Reservation Number");
           while (rs.next()) {
         	   
         	     int sno=rs.getInt("id");
@@ -180,16 +180,7 @@ public class H2DBBookingReservationData {
         	     int age=rs.getInt("age");
         	     String rvNum=rs.getString("rvnum");
         	   
-        	 /*   System.out.println("**********************");
-        	    System.out.println(" Sno             ::"+sno);
-        	    System.out.println(" First Name      ::"+fName);
-        	    System.out.println(" Last  Name      ::"+lName);
-        	    System.out.println(" Age             ::"+age);
-        	    System.out.println(" Reservation Num ::"+rvNum);
-        	    System.out.println("**********************");
-        	   */
-        	    
-        		System.out.println(" "+sno+"  "+fName+"        "+lName+"       "+age+"       "+rvNum);
+        		System.out.println(" "+sno+"    "+fName+"        "+lName+"       "+age+"       "+rvNum);
         		
         	    
              
